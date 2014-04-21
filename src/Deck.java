@@ -1,13 +1,7 @@
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Deck {
-	static ArrayList<Card> cardDeck;
-	private static Random randomGen;
-	
-	public Deck() {
-		initDeck();
-	}
+	private ArrayList<Card> cardDeck;
 	
 	void initDeck() {
 		cardDeck = new ArrayList<Card>();
@@ -20,14 +14,8 @@ public class Deck {
 		}
 	}
 	
-	static Card getRandomCardFromDeck() {
-		randomGen = new Random();
-		int index = randomGen.nextInt(cardDeck.size()-1);
-		
-		Card card = cardDeck.get(index);
-		cardDeck.remove(index);
-		
-		return card;
+	Card getRandomCardFromDeck() {
+		return cardDeck.get(0 + (int)(Math.random() * (((cardDeck.size()-1) - 0) + 1)));
 	}
 	
 	void printDeck() {

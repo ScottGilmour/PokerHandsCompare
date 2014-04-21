@@ -8,18 +8,19 @@ public enum HandResult {
 		this.value = val;
 	}
 	
-	public static int getValueForResult(HandResult result) {
-		return result.value;
+	public int getValueForResult() {
+		return this.value;
 	}
 	
 	int compare(HandResult src, HandResult dest) {
-		if (src.ordinal() > dest.ordinal())
-			return 1;
-		else if (dest.ordinal() > src.ordinal())
-			return -1;
-		else if (src.ordinal() == dest.ordinal())
-			return 0;
 		
+		if (src.getValueForResult() > dest.getValueForResult())
+			return 1;
+		else if (src.getValueForResult() < dest.getValueForResult())
+			return -1;
+		else if (src.getValueForResult() == dest.getValueForResult())
+			return 0;
+				
 		return -2;
 	}
 }
