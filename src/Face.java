@@ -7,7 +7,7 @@ public enum Face {
 		this.value = value;
 	}
 	
-	public static int getIntForFace(Face face) {
-		return face.value;
+	public int getIntForFace() {
+		return this.value;
 	}
 }

@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -10,18 +9,19 @@ public class Hand {
 		return "Hand [dealtCards=" + Arrays.toString(dealtCards) + "]";
 	}
 
-	public Hand() {
+	public Hand(Deck src) {
 		dealtCards = new Card[5];
-		initHand();
+		initHand(src);
 	}
 
-	private void initHand() {
-		for (int i = 0; i < dealtCards.length; i++) {
-			dealtCards[i] = Deck.getRandomCardFromDeck();
+	private void initHand(Deck deck) {
+		for (int i = 0; i < 5; i++) {
+			dealtCards[i] = deck.getRandomCardFromDeck();
 		}
 	}
 	
 	private void sortHand() {
+		
 		Comparator<Card> sortCards = new Comparator<Card>() {
 			@Override
 			public int compare(Card arg0, Card arg1) {
@@ -42,88 +42,47 @@ public class Hand {
 	public HandResult getHandResult() {		
 		return analyzeHand();
 	}
-
-	private HandResult analyzeHand() {
-		//Current hand strength
-		HandResult curResult = HandResult.HIGHCARD;
-		sortHand();
-		
-		int matches = 0, flush = 0, straight = 0;
-		ArrayList<Card> trashStraight = new ArrayList<Card>();
 	
-		for (Card card : dealtCards) {
-			for (Card cardCompare : dealtCards) {
-				//If comparing with oneself, continue
-				if (card == cardCompare)
-					continue;
-					
-				//If the card we are comparing too has not been checked, determine if its face value is one greater than our card
-				if ((Face.getIntForFace(cardCompare.getCardFace()) + 1) == Face.getIntForFace(card.getCardFace())) {
-					if (!trashStraight.contains(cardCompare)) {
-						straight++;
-						trashStraight.add(cardCompare);
-						break;
-					}
-				}
+	private HandResult analyzeHand() {
+		PokerHands mPokerHands = new PokerHands();
+		HandResult curResult = HandResult.HIGHCARD;
+		
+		//Sort the hand from lowest to highest
+		sortHand();
+			
+		//Use a histogram for determining pairs
+		int[] histogram = new int[15];
+		int flush = 0;
+		
+		//For each card in the hand
+		for (int i = 0; i < dealtCards.length-1; i++) {
+			//Increment the histogram for the cards face value
+			histogram[dealtCards[i].getCardFace().getIntForFace()]++;
+			
+			//Increment the flush field if the neighbour card equals the current cards suit.
+			if (dealtCards[i].getCardSuit() == dealtCards[i+1].getCardSuit()) {
+				flush++;
 			}
 		}
 		
-		//Second pass thorugh cards to determine pairs, three of a kind, flush, etc.
-		for (Card card : dealtCards) {
-			for (Card cardCompare : dealtCards) {
-				
-				if (card == cardCompare) {
-					matches++;
-					continue;
-				}
-					
-				if (card.getCardFace() == cardCompare.getCardFace()) {
-					matches++;
-				}
-				
-				if (card.getCardSuit() == cardCompare.getCardSuit()) {
-					flush++;
-				}
-			}
-		}
+		//Determine the hand from the histogram
+		curResult = mPokerHands.getResultForHistogram(histogram);
 		
-		//If counting fields are equal to required cards, set the current hand result to straight/flush/straightflush
-		if (straight == 4)
+		//If the difference between the last card and the first card is 4, it's a straight
+		if ((dealtCards[0].getCardFace().getIntForFace() - dealtCards[4].getCardFace().getIntForFace()) == 4) {
 			curResult = HandResult.STRAIGHT;
+		}
 		
-		if (flush == 20)
+		//If all 5 cards are the same suit, flush.
+		if (flush == 4)
 			curResult = HandResult.FLUSH;
 		
-		if (flush == 20 && straight == 4)
+		//If we had a straight and have a flush, straightflush
+		if (flush == 4 && curResult == HandResult.STRAIGHT)
 			curResult = HandResult.STRAIGHTFLUSH;
 		
-		//Determine what the matches are
-		switch (matches) {
-			case 7:
-				if (curResult.compare(curResult, HandResult.ONEPAIR) == -1)
-					curResult = HandResult.ONEPAIR;
-				break;
-				
-			case 9:
-				if (curResult.compare(curResult, HandResult.TWOPAIR) == -1)
-					curResult = HandResult.TWOPAIR;
-				break;
-				
-			case 11:
-				if (curResult.compare(curResult, HandResult.THREEOFAKIND) == -1)
-					curResult = HandResult.THREEOFAKIND;
-				break;
-				
-			case 13:
-				if (curResult.compare(curResult, HandResult.FULLHOUSE) == -1)
-					curResult = HandResult.FULLHOUSE;
-				break;
-				
-			case 14:
-				if (curResult.compare(curResult, HandResult.FOUROFAKIND) == -1)
-					curResult = HandResult.FOUROFAKIND;
-				break;
-		}
 		return curResult;
 	}
 }
+
+

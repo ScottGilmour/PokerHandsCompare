@@ -7,7 +7,10 @@ public class Card {
 		this.cardFace = face;
 		this.cardSuit = suit;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return "Card [cardSuit=" + cardSuit + ", cardFace=" + cardFace + "]";
